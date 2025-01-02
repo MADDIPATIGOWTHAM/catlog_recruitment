@@ -10,12 +10,12 @@ public class cat {
 
     public static void main(String[] args) {
         try {
-            // Define the file paths for each test case
-            String filePath1 = "./testcase1.json";  // Relative path
-            String filePath2 = "./testcase2.json";  // Relative path
+            
+            String filePath1 = "./testcase1.json";  
+            String filePath2 = "./testcase2.json";  
 
 
-            // Call method for each test case and print results
+            
             System.out.println("Result for Test Case 1:");
             processTestCase(filePath1);
 
@@ -27,19 +27,19 @@ public class cat {
         }
     }
 
-    // Method to process each test case
+    
     private static void processTestCase(String filePath) {
         try {
-            // Load and parse the JSON input file
+            
             String jsonString = new String(Files.readAllBytes(Paths.get(filePath)));
             JSONObject input = new JSONObject(jsonString);
 
-            // Extract n, k, and points
+            
             JSONObject keys = input.getJSONObject("keys");
             int n = keys.getInt("n");
             int k = keys.getInt("k");
 
-            // Collect points (x, y) for interpolation
+            
             List<BigInteger[]> points = new ArrayList<>();
             for (int i = 1; i <= n; i++) {
                 if (input.has(String.valueOf(i))) {
@@ -48,21 +48,21 @@ public class cat {
                     int base = Integer.parseInt(root.getString("base"));
                     String encodedValue = root.getString("value");
 
-                    // Use BigInteger for large values
+                    
                     BigInteger y = new BigInteger(encodedValue, base);
                     points.add(new BigInteger[]{BigInteger.valueOf(x), y});
                 }
             }
 
-            // Ensure we have at least k points for interpolation
+            
             if (points.size() < k) {
                 throw new IllegalArgumentException("Insufficient points for interpolation");
             }
 
-            // Use the first k points for Lagrange Interpolation
+            
             BigInteger constantTerm = findConstantTerm(points.subList(0, k));
 
-            // Output the result for the current test case
+            
             System.out.println("Constant term (c): " + constantTerm.toString(16));  // Output in hex format
 
         } catch (Exception e) {
@@ -70,12 +70,12 @@ public class cat {
         }
     }
 
-    // Lagrange Interpolation to find the constant term
+    
     private static BigInteger findConstantTerm(List<BigInteger[]> points) {
         BigInteger c = BigInteger.ZERO;
         int k = points.size();
     
-        // Lagrange Interpolation
+        
         for (int i = 0; i < k; i++) {
             BigInteger[] p1 = points.get(i);
             BigInteger xi = p1[0], yi = p1[1];
@@ -87,16 +87,16 @@ public class cat {
                     BigInteger xj = p2[0];
 
                     BigInteger diff = xi.subtract(xj).mod(MAX_256BIT);
-                    // Check if diff is invertible (GCD == 1)
+                    
                     if (diff.gcd(MAX_256BIT).equals(BigInteger.ONE)) {
                         li = li.multiply(diff.modInverse(MAX_256BIT)).mod(MAX_256BIT);
                     } else {
-                        // Log or handle the case where inverse is not possible
-                        continue;  // Skip this invalid pair
+                        
+                        continue;  
                     }
                 }
             }
-            c = c.add(yi.multiply(li)).mod(MAX_256BIT); // Add the contribution of this term and reduce modulo 2^256
+            c = c.add(yi.multiply(li)).mod(MAX_256BIT); 
         }
         return c;
     }
